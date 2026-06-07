@@ -51,6 +51,12 @@ function loadTopics() {
     });
 }
 
+// ===== HAMBURGER MENU =====
+function toggleMenu() {
+    const navLinks = document.getElementById('nav-links');
+    navLinks.classList.toggle('active');
+}
+
 // ===== CREATE TOPIC CARD =====
 function createTopicCard(topic) {
     const card = document.createElement('div');
