@@ -183,6 +183,27 @@ function loginUser() {
         });
 }
 
+// ===== FORGOT PASSWORD =====
+function forgotPassword() {
+    const email = document.getElementById('email').value.trim();
+    const errorMessage = document.getElementById('error-message');
+    const successMessage = document.getElementById('success-message');
+
+    if (!email) {
+        errorMessage.textContent = 'Please enter your email address first.';
+        return;
+    }
+
+    auth.sendPasswordResetEmail(email)
+        .then(() => {
+            successMessage.textContent = 'Password reset email sent! Check your inbox.';
+            errorMessage.textContent = '';
+        })
+        .catch((error) => {
+            errorMessage.textContent = error.message;
+        });
+}
+
 // ===== REGISTER USER =====
 function registerUser() {
     const fullname = document.getElementById('fullname').value.trim();

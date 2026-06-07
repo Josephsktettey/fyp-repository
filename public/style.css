@@ -920,3 +920,14 @@ body {
     color: var(--white);
     border-color: var(--primary);
 }
+
+/* ===== FORGOT PASSWORD ===== */
+.forgot-password-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0;
+    text-decoration: underline;
+}
