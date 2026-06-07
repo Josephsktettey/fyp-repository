@@ -2,26 +2,40 @@
 
 // Firebase Configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAzPQn5t_NOVwlNeyAz1lJh2S7xWmXgveY",
-  authDomain: "fyp-repository-8edaa.firebaseapp.com",
-  databaseURL: "https://fyp-repository-8edaa-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "fyp-repository-8edaa",
-  storageBucket: "fyp-repository-8edaa.firebasestorage.app",
-  messagingSenderId: "848573587059",
-  appId: "1:848573587059:web:219c2d43952e89461d5406",
-  measurementId: "G-L40NT4MDJT"
+    apiKey: "AIzaSyAzPQn5t_NOVwlNeyAz1lJh2S7xWmXgveY",
+    authDomain: "fyp-repository-8edaa.firebaseapp.com",
+    databaseURL: "https://fyp-repository-8edaa-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "fyp-repository-8edaa",
+    storageBucket: "fyp-repository-8edaa.firebasestorage.app",
+    messagingSenderId: "848573587059",
+    appId: "1:848573587059:web:219c2d43952e89461d5406"
 };
-// const firebaseConfig = {
-//     databaseURL: "https://fyp-repository-8edaa-default-rtdb.europe-west1.firebasedatabase.app/"
-// };
-
-
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
-// Initialize Firebase Auth
 const auth = firebase.auth();
+
+// ===== HAMBURGER MENU =====
+function toggleMenu() {
+    const navLinks = document.getElementById('nav-links');
+    navLinks.classList.toggle('active');
+}
+
+// ===== PAGE TRANSITION =====
+document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (link && link.href && !link.href.startsWith('#') && link.target !== '_blank') {
+        e.preventDefault();
+        document.body.style.animation = 'none';
+        document.body.style.opacity = '0';
+        document.body.style.transform = 'translateY(-15px)';
+        document.body.style.transition = 'all 0.15s ease';
+        setTimeout(() => {
+            window.location.href = link.href;
+        }, 150);
+    }
+});
 
 // ===== LOAD TOPICS ON HOMEPAGE =====
 function loadTopics() {
@@ -39,7 +53,6 @@ function loadTopics() {
         }
 
         const topicsArray = [];
-
         snapshot.forEach((childSnapshot) => {
             topicsArray.push(childSnapshot.val());
         });
@@ -49,12 +62,6 @@ function loadTopics() {
             topicsGrid.appendChild(card);
         });
     });
-}
-
-// ===== HAMBURGER MENU =====
-function toggleMenu() {
-    const navLinks = document.getElementById('nav-links');
-    navLinks.classList.toggle('active');
 }
 
 // ===== CREATE TOPIC CARD =====
@@ -103,11 +110,7 @@ function searchTopics() {
             const department = topic.department.toLowerCase();
             const description = topic.description ? topic.description.toLowerCase() : '';
 
-            if (
-                title.includes(searchInput) ||
-                department.includes(searchInput) ||
-                description.includes(searchInput)
-            ) {
+            if (title.includes(searchInput) || department.includes(searchInput) || description.includes(searchInput)) {
                 const card = createTopicCard(topic);
                 topicsGrid.appendChild(card);
                 found++;
@@ -119,10 +122,36 @@ function searchTopics() {
         }
     });
 }
-// ===== INITIALIZE PAGE =====
-document.addEventListener('DOMContentLoaded', () => {
-    loadTopics();
-});
+
+// ===== FILTER BY DEPARTMENT =====
+function filterByDepartment() {
+    const department = document.getElementById('departmentFilter').value;
+    const topicsGrid = document.getElementById('topicsGrid');
+
+    if (!department) {
+        loadTopics();
+        return;
+    }
+
+    topicsGrid.innerHTML = '<p class="loading-text">Filtering...</p>';
+
+    database.ref('topics').orderByChild('department').equalTo(department).once('value', (snapshot) => {
+        topicsGrid.innerHTML = '';
+
+        if (!snapshot.exists()) {
+            topicsGrid.innerHTML = '<p class="loading-text">No topics found for this department.</p>';
+            return;
+        }
+
+        snapshot.forEach((childSnapshot) => {
+            const topic = childSnapshot.val();
+            if (topic.status === 'approved') {
+                const card = createTopicCard(topic);
+                topicsGrid.appendChild(card);
+            }
+        });
+    });
+}
 
 // ===== LOGIN USER =====
 function loginUser() {
@@ -130,7 +159,8 @@ function loginUser() {
     const password = document.getElementById('password').value.trim();
     const errorMessage = document.getElementById('error-message');
 
-    // Basic validation
+    errorMessage.textContent = '';
+
     if (!email || !password) {
         errorMessage.textContent = 'Please fill in all fields.';
         return;
@@ -138,14 +168,12 @@ function loginUser() {
 
     auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
-            const user = userCredential.user;
             window.location.href = 'dashboard.html';
         })
         .catch((error) => {
             errorMessage.textContent = error.message;
         });
 }
-
 
 // ===== REGISTER USER =====
 function registerUser() {
@@ -158,11 +186,9 @@ function registerUser() {
     const errorMessage = document.getElementById('error-message');
     const successMessage = document.getElementById('success-message');
 
-    // Clear previous messages
     errorMessage.textContent = '';
     successMessage.textContent = '';
 
-    // Validation
     if (!fullname || !email || !department || !role || !password || !confirmPassword) {
         errorMessage.textContent = 'Please fill in all fields.';
         return;
@@ -178,12 +204,9 @@ function registerUser() {
         return;
     }
 
-    // Create user with Firebase Auth
     auth.createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
             const user = userCredential.user;
-
-            // Save extra user info to database
             return database.ref('users/' + user.uid).set({
                 fullname: fullname,
                 email: email,
@@ -218,27 +241,26 @@ function loadDashboard() {
             return;
         }
 
-        // Get user info from database
         database.ref('users/' + user.uid).once('value', (snapshot) => {
-    const userData = snapshot.val();
-    document.getElementById('welcome-text').textContent = 'Welcome back, ' + userData.fullname + '!';
-    document.getElementById('user-name').textContent = userData.fullname;
+            const userData = snapshot.val();
+            document.getElementById('welcome-text').textContent = 'Welcome back, ' + userData.fullname + '!';
+            document.getElementById('user-name').textContent = userData.fullname;
 
-    // Show admin link if admin
-    if (userData.role === 'admin') {
-        const adminLink = document.getElementById('admin-link');
-        if (adminLink) adminLink.style.display = 'block';
-    }
+            if (userData.role === 'admin') {
+                const adminLink = document.getElementById('admin-link');
+                if (adminLink) adminLink.style.display = 'block';
+            }
 
-    // Load topics based on role
-    if (userData.role === 'student') {
-        loadStudentTopics(user.uid);
-    } else if (userData.role === 'supervisor') {
-        loadSupervisorTopics(userData.department);
-    } else if (userData.role === 'admin') {
-        loadAllTopics();
-    }
-});
+            if (userData.role === 'student') {
+                loadStudentTopics(user.uid);
+            } else if (userData.role === 'supervisor') {
+                loadSupervisorTopics(userData.department);
+            } else if (userData.role === 'admin') {
+                loadAllTopics();
+            }
+        });
+    });
+}
 
 // ===== LOAD STUDENT TOPICS =====
 function loadStudentTopics(uid) {
@@ -246,10 +268,7 @@ function loadStudentTopics(uid) {
         const tableBody = document.getElementById('topics-table-body');
         tableBody.innerHTML = '';
 
-        let total = 0;
-        let approved = 0;
-        let pending = 0;
-        let rejected = 0;
+        let total = 0, approved = 0, pending = 0, rejected = 0;
 
         if (!snapshot.exists()) {
             tableBody.innerHTML = '<tr><td colspan="6" class="loading-text">You have not submitted any topics yet.</td></tr>';
@@ -261,7 +280,6 @@ function loadStudentTopics(uid) {
             const topic = childSnapshot.val();
             const key = childSnapshot.key;
             total++;
-
             if (topic.status === 'approved') approved++;
             if (topic.status === 'pending') pending++;
             if (topic.status === 'rejected') rejected++;
@@ -293,10 +311,7 @@ function loadSupervisorTopics(department) {
         const tableBody = document.getElementById('topics-table-body');
         tableBody.innerHTML = '';
 
-        let total = 0;
-        let approved = 0;
-        let pending = 0;
-        let rejected = 0;
+        let total = 0, approved = 0, pending = 0, rejected = 0;
 
         if (!snapshot.exists()) {
             tableBody.innerHTML = '<tr><td colspan="6" class="loading-text">No topics found in your department.</td></tr>';
@@ -308,7 +323,6 @@ function loadSupervisorTopics(department) {
             const topic = childSnapshot.val();
             const key = childSnapshot.key;
             total++;
-
             if (topic.status === 'approved') approved++;
             if (topic.status === 'pending') pending++;
             if (topic.status === 'rejected') rejected++;
@@ -339,16 +353,13 @@ function loadSupervisorTopics(department) {
     });
 }
 
-// ===== LOAD ALL TOPICS (ADMIN) =====
+// ===== LOAD ALL TOPICS ADMIN =====
 function loadAllTopics() {
     database.ref('topics').on('value', (snapshot) => {
         const tableBody = document.getElementById('topics-table-body');
         tableBody.innerHTML = '';
 
-        let total = 0;
-        let approved = 0;
-        let pending = 0;
-        let rejected = 0;
+        let total = 0, approved = 0, pending = 0, rejected = 0;
 
         if (!snapshot.exists()) {
             tableBody.innerHTML = '<tr><td colspan="6" class="loading-text">No topics found.</td></tr>';
@@ -360,7 +371,6 @@ function loadAllTopics() {
             const topic = childSnapshot.val();
             const key = childSnapshot.key;
             total++;
-
             if (topic.status === 'approved') approved++;
             if (topic.status === 'pending') pending++;
             if (topic.status === 'rejected') rejected++;
@@ -402,87 +412,32 @@ function updateStats(total, approved, pending, rejected) {
     document.getElementById('rejected-topics').textContent = rejected;
 }
 
-        // Load all topics
-        database.ref('topics').on('value', (snapshot) => {
-            const tableBody = document.getElementById('topics-table-body');
-            tableBody.innerHTML = '';
+// ===== APPROVE TOPIC =====
+function approveTopic(key) {
+    if (confirm('Approve this topic?')) {
+        database.ref('topics/' + key).update({ status: 'approved' })
+            .then(() => alert('Topic approved successfully.'))
+            .catch((error) => alert('Error: ' + error.message));
+    }
+}
 
-            let total = 0;
-            let approved = 0;
-            let pending = 0;
-            let rejected = 0;
-
-            if (!snapshot.exists()) {
-                tableBody.innerHTML = '<tr><td colspan="6" class="loading-text">No topics found.</td></tr>';
-                return;
-            }
-
-            snapshot.forEach((childSnapshot) => {
-                const topic = childSnapshot.val();
-                const key = childSnapshot.key;
-                total++;
-
-                if (topic.status === 'approved') approved++;
-                if (topic.status === 'pending') pending++;
-                if (topic.status === 'rejected') rejected++;
-
-                const row = `
-                    <tr>
-                        <td>${topic.title}</td>
-                        <td>${topic.department}</td>
-                        <td>${topic.submittedBy}</td>
-                        <td>${new Date(topic.createdAt).toLocaleDateString()}</td>
-                        <td><span class="badge ${topic.status}">${topic.status}</span></td>
-                        <td class="action-buttons">
-                            ${topic.status === 'pending' ? `
-                                <button class="btn-small btn-approve" onclick="approveTopic('${key}')">
-                                    <i class="fas fa-check"></i> Approve
-                                </button>
-                                <button class="btn-small btn-reject" onclick="rejectTopic('${key}')">
-                                    <i class="fas fa-times"></i> Reject
-                                </button>
-                            ` : ''}
-                            <button class="btn-small btn-danger" onclick="deleteTopic('${key}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-</td>
-                    </tr>
-                `;
-                tableBody.innerHTML += row;
-            });
-
-            document.getElementById('total-topics').textContent = total;
-            document.getElementById('approved-topics').textContent = approved;
-            document.getElementById('pending-topics').textContent = pending;
-            document.getElementById('rejected-topics').textContent = rejected;
-        });
-    });
+// ===== REJECT TOPIC =====
+function rejectTopic(key) {
+    if (confirm('Reject this topic?')) {
+        database.ref('topics/' + key).update({ status: 'rejected' })
+            .then(() => alert('Topic rejected successfully.'))
+            .catch((error) => alert('Error: ' + error.message));
+    }
 }
 
 // ===== DELETE TOPIC =====
 function deleteTopic(key) {
     if (confirm('Are you sure you want to delete this topic?')) {
         database.ref('topics/' + key).remove()
-            .then(() => {
-                alert('Topic deleted successfully.');
-            })
-            .catch((error) => {
-                alert('Error: ' + error.message);
-            });
+            .then(() => alert('Topic deleted successfully.'))
+            .catch((error) => alert('Error: ' + error.message));
     }
 }
-
-// ===== INITIALIZE PAGE =====
-document.addEventListener('DOMContentLoaded', () => {
-    const page = window.location.pathname;
-
-    if (page.includes('dashboard')) {
-        loadDashboard();
-    } else {
-        loadTopics();
-    }
-});
-
 
 // ===== SUBMIT TOPIC =====
 function submitTopic() {
@@ -507,7 +462,6 @@ function submitTopic() {
         return;
     }
 
-    // Check for duplicate topics
     database.ref('topics').once('value', (snapshot) => {
         let isDuplicate = false;
 
@@ -523,7 +477,6 @@ function submitTopic() {
             return;
         }
 
-        // Get user info then save topic
         database.ref('users/' + user.uid).once('value', (userSnapshot) => {
             const userData = userSnapshot.val();
 
@@ -548,61 +501,6 @@ function submitTopic() {
     });
 }
 
-// ===== APPROVE TOPIC =====
-function approveTopic(key) {
-    if (confirm('Approve this topic?')) {
-        database.ref('topics/' + key).update({
-            status: 'approved'
-        }).then(() => {
-            alert('Topic approved successfully.');
-        }).catch((error) => {
-            alert('Error: ' + error.message);
-        });
-    }
-}
-
-// ===== REJECT TOPIC =====
-function rejectTopic(key) {
-    if (confirm('Reject this topic?')) {
-        database.ref('topics/' + key).update({
-            status: 'rejected'
-        }).then(() => {
-            alert('Topic rejected successfully.');
-        }).catch((error) => {
-            alert('Error: ' + error.message);
-        });
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const page = window.location.pathname;
-
-    if (page.includes('dashboard')) {
-        auth.onAuthStateChanged((user) => {
-            if (!user) {
-                window.location.href = 'login.html';
-                return;
-            }
-            loadDashboard();
-        });
-    } else if (page.includes('submit')) {
-        auth.onAuthStateChanged((user) => {
-            if (!user) {
-                window.location.href = 'login.html';
-                return;
-            }
-            database.ref('users/' + user.uid).once('value', (snapshot) => {
-                const userData = snapshot.val();
-                const userNameEl = document.getElementById('user-name');
-                if (userNameEl) userNameEl.textContent = userData.fullname;
-            });
-        });
-    } else {
-        loadTopics();
-    }
-});
-
-
 // ===== LOAD ADMIN PANEL =====
 function loadAdminPanel() {
     auth.onAuthStateChanged((user) => {
@@ -611,7 +509,6 @@ function loadAdminPanel() {
             return;
         }
 
-        // Verify user is admin
         database.ref('users/' + user.uid).once('value', (snapshot) => {
             const userData = snapshot.val();
 
@@ -670,29 +567,104 @@ function loadAllUsers() {
 
 // ===== UPDATE USER ROLE =====
 function updateUserRole(uid, newRole) {
-    database.ref('users/' + uid).update({
-        role: newRole
-    }).then(() => {
-        alert('User role updated successfully.');
-    }).catch((error) => {
-        alert('Error: ' + error.message);
-    });
+    database.ref('users/' + uid).update({ role: newRole })
+        .then(() => alert('User role updated successfully.'))
+        .catch((error) => alert('Error: ' + error.message));
 }
 
 // ===== DELETE USER =====
 function deleteUser(uid) {
     if (confirm('Are you sure you want to delete this user?')) {
         database.ref('users/' + uid).remove()
-            .then(() => {
-                alert('User deleted successfully.');
-            })
-            .catch((error) => {
-                alert('Error: ' + error.message);
-            });
+            .then(() => alert('User deleted successfully.'))
+            .catch((error) => alert('Error: ' + error.message));
     }
 }
 
+// ===== BROWSE PAGE =====
+let allTopics = [];
+let currentPage = 1;
+const topicsPerPage = 20;
 
+function loadBrowseTopics() {
+    database.ref('topics').once('value', (snapshot) => {
+        allTopics = [];
+
+        if (!snapshot.exists()) {
+            document.getElementById('browse-table-body').innerHTML = '<tr><td colspan="5" class="loading-text">No topics found.</td></tr>';
+            return;
+        }
+
+        snapshot.forEach((childSnapshot) => {
+            allTopics.push(childSnapshot.val());
+        });
+
+        document.getElementById('topics-count').textContent = `${allTopics.length} topics found`;
+        renderBrowseTable(allTopics);
+    });
+}
+
+function renderBrowseTable(topics) {
+    const tableBody = document.getElementById('browse-table-body');
+    const pagination = document.getElementById('pagination');
+    tableBody.innerHTML = '';
+
+    if (topics.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="loading-text">No topics match your search.</td></tr>';
+        pagination.innerHTML = '';
+        return;
+    }
+
+    const totalPages = Math.ceil(topics.length / topicsPerPage);
+    const start = (currentPage - 1) * topicsPerPage;
+    const end = start + topicsPerPage;
+    const pageTopics = topics.slice(start, end);
+
+    pageTopics.forEach((topic, index) => {
+        const row = `
+            <tr>
+                <td>${start + index + 1}</td>
+                <td>${topic.title}</td>
+                <td>${topic.department}</td>
+                <td>${topic.year}</td>
+                <td><span class="badge ${topic.status}">${topic.status}</span></td>
+            </tr>
+        `;
+        tableBody.innerHTML += row;
+    });
+
+    pagination.innerHTML = '';
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.classList.add('page-btn');
+        if (i === currentPage) btn.classList.add('active');
+        btn.textContent = i;
+        btn.onclick = () => {
+            currentPage = i;
+            renderBrowseTable(topics);
+        };
+        pagination.appendChild(btn);
+    }
+}
+
+function filterBrowse() {
+    const search = document.getElementById('browseSearch').value.toLowerCase();
+    const year = document.getElementById('browseYear').value;
+    const status = document.getElementById('browseStatus').value;
+
+    const filtered = allTopics.filter((topic) => {
+        const matchSearch = topic.title.toLowerCase().includes(search);
+        const matchYear = year ? topic.year === year : true;
+        const matchStatus = status ? topic.status === status : true;
+        return matchSearch && matchYear && matchStatus;
+    });
+
+    document.getElementById('topics-count').textContent = `${filtered.length} topics found`;
+    currentPage = 1;
+    renderBrowseTable(filtered);
+}
+
+// ===== INITIALIZE PAGE =====
 document.addEventListener('DOMContentLoaded', () => {
     const page = window.location.pathname;
 
@@ -724,121 +696,3 @@ document.addEventListener('DOMContentLoaded', () => {
         loadTopics();
     }
 });
-
-// ===== FILTER BY DEPARTMENT =====
-// ===== FILTER BY DEPARTMENT =====
-function filterByDepartment() {
-    const department = document.getElementById('departmentFilter').value;
-    const topicsGrid = document.getElementById('topicsGrid');
-
-    if (!department) {
-        loadTopics();
-        return;
-    }
-
-    topicsGrid.innerHTML = '<p class="loading-text">Filtering...</p>';
-
-    database.ref('topics').orderByChild('department').equalTo(department).once('value', (snapshot) => {
-        topicsGrid.innerHTML = '';
-
-        if (!snapshot.exists()) {
-            topicsGrid.innerHTML = '<p class="loading-text">No topics found for this department.</p>';
-            return;
-        }
-
-        snapshot.forEach((childSnapshot) => {
-            const topic = childSnapshot.val();
-            if (topic.status === 'approved') {
-                const card = createTopicCard(topic);
-                topicsGrid.appendChild(card);
-            }
-        });
-    });
-}
-
-
-// ===== BROWSE PAGE =====
-let allTopics = [];
-let currentPage = 1;
-const topicsPerPage = 20;
-
-function loadBrowseTopics() {
-    database.ref('topics').once('value', (snapshot) => {
-        allTopics = [];
-
-        if (!snapshot.exists()) {
-            document.getElementById('browse-table-body').innerHTML = '<tr><td colspan="5" class="loading-text">No topics found.</td></tr>';
-            return;
-        }
-
-        snapshot.forEach((childSnapshot) => {
-            const topic = childSnapshot.val();
-            allTopics.push(topic);
-        });
-
-        document.getElementById('topics-count').textContent = `${allTopics.length} topics found`;
-        renderBrowseTable(allTopics);
-    });
-}
-
-function renderBrowseTable(topics) {
-    const tableBody = document.getElementById('browse-table-body');
-    const pagination = document.getElementById('pagination');
-    tableBody.innerHTML = '';
-
-    if (topics.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="5" class="loading-text">No topics match your search.</td></tr>';
-        pagination.innerHTML = '';
-        return;
-    }
-
-    // Pagination
-    const totalPages = Math.ceil(topics.length / topicsPerPage);
-    const start = (currentPage - 1) * topicsPerPage;
-    const end = start + topicsPerPage;
-    const pageTopics = topics.slice(start, end);
-
-    pageTopics.forEach((topic, index) => {
-        const row = `
-            <tr>
-                <td>${start + index + 1}</td>
-                <td>${topic.title}</td>
-                <td>${topic.department}</td>
-                <td>${topic.year}</td>
-                <td><span class="badge ${topic.status}">${topic.status}</span></td>
-            </tr>
-        `;
-        tableBody.innerHTML += row;
-    });
-
-    // Render pagination buttons
-    pagination.innerHTML = '';
-    for (let i = 1; i <= totalPages; i++) {
-        const btn = document.createElement('button');
-        btn.classList.add('page-btn');
-        if (i === currentPage) btn.classList.add('active');
-        btn.textContent = i;
-        btn.onclick = () => {
-            currentPage = i;
-            renderBrowseTable(topics);
-        };
-        pagination.appendChild(btn);
-    }
-}
-
-function filterBrowse() {
-    const search = document.getElementById('browseSearch').value.toLowerCase();
-    const year = document.getElementById('browseYear').value;
-    const status = document.getElementById('browseStatus').value;
-
-    const filtered = allTopics.filter((topic) => {
-        const matchSearch = topic.title.toLowerCase().includes(search);
-        const matchYear = year ? topic.year === year : true;
-        const matchStatus = status ? topic.status === status : true;
-        return matchSearch && matchYear && matchStatus;
-    });
-
-    document.getElementById('topics-count').textContent = `${filtered.length} topics found`;
-    currentPage = 1;
-    renderBrowseTable(filtered);
-}
