@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FYP Repository | Home</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- NAVIGATION -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-book-open"></i>
+                <span>FYP Repository</span>
+            </div>
+            <button class="hamburger" onclick="toggleMenu()" id="hamburger">
+    <i class="fas fa-bars"></i>
+</button>
+<div class="nav-links" id="nav-links">
+    <a href="index.html">Home</a>
+    <a href="browse.html">Browse</a>
+    <a href="login.html">Login</a>
+    <a href="register.html" class="btn-primary">Register</a>
+</div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Final Year Project <span class="highlight">Topics Repository</span></h1>
+            <p>Search, discover and submit final year project topics. A centralized platform for students, supervisors and administrators.</p>
+            <div class="hero-buttons">
+                <a href="register.html" class="btn-primary">Get Started</a>
+                <a href="#search-section" class="btn-outline">Browse Topics</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEARCH SECTION -->
+    <section class="search-section" id="search-section">
+        <div class="container">
+            <h2>Search Project Topics</h2>
+            <p>Find existing project topics by keyword, department or year</p>
+            <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search by keyword, department or title..." onkeypress="if(event.key === 'Enter') searchTopics()" oninput="if(this.value === '') loadTopics()">
+    <select id="departmentFilter" onchange="filterByDepartment()">
+        <option value="">All Departments</option>
+        <option value="Computer Science">Computer Science</option>
+        <option value="Information Technology">Information Technology</option>
+        <option value="Electrical Engineering">Electrical Engineering</option>
+        <option value="Mechanical Engineering">Mechanical Engineering</option>
+        <option value="Civil Engineering">Civil Engineering</option>
+        <option value="Business Administration">Business Administration</option>
+    </select>
+    <button class="btn-primary" onclick="searchTopics()">
+        <i class="fas fa-search"></i> Search
+    </button>
+</div>
+        </div>
+    </section>
+
+    <!-- TOPICS SECTION -->
+    <section class="topics-section">
+    <div class="container">
+        <div class="topics-section-header">
+            <h2>Recent Project Topics</h2>
+            <a href="browse.html" class="btn-primary">Browse All Topics <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="topics-grid" id="topicsGrid">
+                <!-- Topics will load here dynamically -->
+                <p class="loading-text">Loading topics...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 FYP Repository. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

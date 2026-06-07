@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FYP Repository | Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- NAVIGATION -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-book-open"></i>
+                <span>FYP Repository</span>
+            </div>
+            <button class="hamburger" onclick="toggleMenu()" id="hamburger">
+    <i class="fas fa-bars"></i>
+</button>
+<div class="nav-links" id="nav-links">
+    <a href="index.html">Home</a>
+    <a href="browse.html">Browse</a>
+    <a href="dashboard.html">Dashboard</a>
+    <span id="user-name" class="user-name"></span>
+    <button class="btn-outline-dark" onclick="logoutUser()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+</div>
+        </div>
+    </nav>
+
+    <!-- ADMIN SECTION -->
+    <section class="dashboard-section">
+        <div class="container">
+
+            <!-- HEADER -->
+            <div class="welcome-banner">
+                <div>
+                    <h2>Admin Panel</h2>
+                    <p>Manage all users and their roles</p>
+                </div>
+            </div>
+
+            <!-- USERS TABLE -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>Registered Users</h3>
+                </div>
+                <table class="topics-table">
+                    <thead>
+                        <tr>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Department</th>
+                            <th>Role</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <tr>
+                            <td colspan="6" class="loading-text">Loading users...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 FYP Repository. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

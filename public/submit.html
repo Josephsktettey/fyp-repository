@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FYP Repository | Submit Topic</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- NAVIGATION -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-book-open"></i>
+                <span>FYP Repository</span>
+            </div>
+            <button class="hamburger" onclick="toggleMenu()" id="hamburger">
+    <i class="fas fa-bars"></i>
+</button>
+<div class="nav-links" id="nav-links">
+    <a href="index.html">Home</a>
+    <a href="browse.html">Browse</a>
+    <a href="dashboard.html">Dashboard</a>
+    <span id="user-name" class="user-name"></span>
+    <button class="btn-outline-dark" onclick="logoutUser()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+</div>
+        </div>
+    </nav>
+
+    <!-- SUBMIT SECTION -->
+    <section class="auth-section">
+        <div class="auth-container" style="max-width: 650px;">
+            <div class="auth-header">
+                <i class="fas fa-paper-plane"></i>
+                <h2>Submit Project Topic</h2>
+                <p>Fill in the details below to submit your project topic for approval</p>
+            </div>
+            <div class="auth-form">
+                <div class="form-group">
+                    <label for="title">Project Title</label>
+                    <input type="text" id="title" placeholder="Enter your project title">
+                </div>
+                <div class="form-group">
+                    <label for="department">Department</label>
+                    <select id="department">
+                        <option value="">Select department</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Electrical Engineering">Electrical Engineering</option>
+                        <option value="Mechanical Engineering">Mechanical Engineering</option>
+                        <option value="Civil Engineering">Civil Engineering</option>
+                        <option value="Business Administration">Business Administration</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="year">Academic Year</label>
+                    <select id="year">
+                        <option value="">Select academic year</option>
+                        <option value="2023/2024">2023/2024</option>
+                        <option value="2024/2025">2024/2025</option>
+                        <option value="2025/2026">2025/2026</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="description">Project Description</label>
+                    <textarea id="description" rows="4" placeholder="Briefly describe your project topic..."></textarea>
+                </div>
+                <div id="error-message" class="error-message"></div>
+                <div id="success-message" class="success-message"></div>
+                <button class="btn-primary btn-full" onclick="submitTopic()">
+                    <i class="fas fa-paper-plane"></i> Submit Topic
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 FYP Repository. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
