@@ -17,10 +17,18 @@ const database = firebase.database();
 const auth = firebase.auth();
 
 // ===== HAMBURGER MENU =====
+// ===== HAMBURGER MENU =====
 function toggleMenu() {
     const navLinks = document.getElementById('nav-links');
     navLinks.classList.toggle('active');
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const hamburger = document.getElementById('hamburger');
+    if (hamburger) {
+        hamburger.addEventListener('click', toggleMenu);
+    }
+});
 
 // ===== PAGE TRANSITION =====
 document.addEventListener('click', (e) => {
@@ -666,6 +674,12 @@ function filterBrowse() {
 
 // ===== INITIALIZE PAGE =====
 document.addEventListener('DOMContentLoaded', () => {
+    // Hamburger menu
+    const hamburger = document.getElementById('hamburger');
+    if (hamburger) {
+        hamburger.addEventListener('click', toggleMenu);
+    }
+
     const page = window.location.pathname;
 
     if (page.includes('dashboard')) {
