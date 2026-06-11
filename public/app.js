@@ -218,20 +218,47 @@ function registerUser() {
     errorMessage.textContent = '';
     successMessage.textContent = '';
 
-    if (!fullname || !email || !department || !role || !password || !confirmPassword) {
-        errorMessage.textContent = 'Please fill in all fields.';
-        return;
-    }
+    // Check all fields filled
+if (!fullname || !email || !department || !password || !confirmPassword) {
+    errorMessage.textContent = 'Please fill in all fields.';
+    return;
+}
 
-    if (password !== confirmPassword) {
-        errorMessage.textContent = 'Passwords do not match.';
-        return;
-    }
+// Full name - letters and spaces only
+const nameRegex = /^[a-zA-Z\s]+$/;
+if (!nameRegex.test(fullname)) {
+    errorMessage.textContent = 'Full name should contain letters only.';
+    return;
+}
 
-    if (password.length < 6) {
-        errorMessage.textContent = 'Password must be at least 6 characters.';
-        return;
-    }
+// Email format validation
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+if (!emailRegex.test(email)) {
+    errorMessage.textContent = 'Please enter a valid email address.';
+    return;
+}
+
+// Valid email providers
+const validProviders = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com'];
+const emailDomain = email.split('@')[1].toLowerCase();
+if (!validProviders.includes(emailDomain)) {
+    errorMessage.textContent = 'Please use a valid email provider (Gmail, Yahoo, Outlook, Hotmail or iCloud).';
+    return;
+}
+
+// Password length
+// Password must contain letters and numbers
+const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9])/;
+if (!passwordRegex.test(password)) {
+    errorMessage.textContent = 'Password must contain both letters and numbers.';
+    return;
+}
+
+// Confirm password
+if (password !== confirmPassword) {
+    errorMessage.textContent = 'Passwords do not match.';
+    return;
+}
 
     auth.createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
