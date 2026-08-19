@@ -290,6 +290,7 @@ function logoutUser() {
 }
 
 // ===== LOAD DASHBOARD =====
+// ===== LOAD DASHBOARD =====
 function loadDashboard() {
     auth.onAuthStateChanged((user) => {
         if (!user) {
@@ -299,14 +300,30 @@ function loadDashboard() {
 
         database.ref('users/' + user.uid).once('value', (snapshot) => {
             const userData = snapshot.val();
-            document.getElementById('welcome-text').textContent = 'Welcome back, ' + userData.fullname + '!';
-            document.getElementById('user-name').textContent = userData.fullname;
 
+            document.getElementById('welcome-text').textContent =
+                'Welcome back, ' + userData.fullname + '!';
+
+            document.getElementById('user-name').textContent =
+                userData.fullname;
+
+            // Show Admin Panel link only for admins
             if (userData.role === 'admin') {
                 const adminLink = document.getElementById('admin-link');
-                if (adminLink) adminLink.style.display = 'block';
+                if (adminLink) {
+                    adminLink.style.display = 'block';
+                }
             }
 
+            // Hide Submit New Topic button for supervisors
+            if (userData.role === 'supervisor') {
+                const submitButton = document.getElementById('submit-topic-btn');
+                if (submitButton) {
+                    submitButton.style.display = 'none';
+                }
+            }
+
+            // Load topics according to user role
             if (userData.role === 'student') {
                 loadStudentTopics(user.uid);
             } else if (userData.role === 'supervisor') {
