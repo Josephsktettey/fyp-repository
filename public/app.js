@@ -362,6 +362,7 @@ function loadStudentTopics(uid) {
 }
 
 // ===== LOAD SUPERVISOR TOPICS =====
+// ===== LOAD SUPERVISOR TOPICS =====
 function loadSupervisorTopics(department) {
     database.ref('topics').orderByChild('department').equalTo(department).on('value', (snapshot) => {
         const tableBody = document.getElementById('topics-table-body');
@@ -375,10 +376,33 @@ function loadSupervisorTopics(department) {
             return;
         }
 
+        // Collect all topics
+        const topics = [];
+
         snapshot.forEach((childSnapshot) => {
-            const topic = childSnapshot.val();
-            const key = childSnapshot.key;
+            topics.push({
+                key: childSnapshot.key,
+                ...childSnapshot.val()
+            });
+        });
+
+        // Sort: Pending → Rejected → Approved
+        const statusOrder = {
+            pending: 1,
+            rejected: 2,
+            approved: 3
+        };
+
+        topics.sort((a, b) => {
+            return (statusOrder[a.status] || 4) - (statusOrder[b.status] || 4);
+        });
+
+        // Display topics
+        topics.forEach((topic) => {
+            const key = topic.key;
+
             total++;
+
             if (topic.status === 'approved') approved++;
             if (topic.status === 'pending') pending++;
             if (topic.status === 'rejected') rejected++;
@@ -402,6 +426,7 @@ function loadSupervisorTopics(department) {
                     </td>
                 </tr>
             `;
+
             tableBody.innerHTML += row;
         });
 
